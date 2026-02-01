@@ -1,0 +1,22 @@
+[
+  {
+    "description": "Standard Indian User Profile",
+    "text": "Name: Amit Kumar, PAN: ABCDE1234F, Aadhaar: 4567 8901 2345.",
+    "must_contain": ["PERSON", "PAN_NUMBER", "AADHAAR_NUMBER"]
+  },
+  {
+    "description": "Contact Information",
+    "text": "Please send the report to test.user@example.com or call +91-9876543210.",
+    "must_contain": ["EMAIL_ADDRESS", "PHONE_NUMBER"]
+  },
+  {
+    "description": "Financial Transaction",
+    "text": "I transferred 500rs to merchant@okaxis via UPI.",
+    "must_contain": ["UPI_ID"]
+  },
+  {
+    "description": "Location Data",
+    "text": "The delivery is scheduled for HSR Layout, Bangalore.",
+    "must_contain": ["LOCATION"]
+  }
+]
