@@ -32,8 +32,11 @@ The backend is powered by **FastAPI** and **Presidio**, and the frontend is buil
   - Location
   - Voter ID
   - IBAN
+  - Person Name
+  - Employee ID
 - Highlights detected PII in text
-- Masking and unmasking
+- Masks sensitive values
+- Unmask to restore original content
 - Adjustable confidence threshold
 - Confidence score for each detected entity
 - Supports file upload (TXT and PDF)
@@ -48,7 +51,7 @@ This application supports **only** the following file formats:
 - `.txt` — plain text files  
 - `.pdf` — PDF documents  
 
-Other file types (including JSON, Word, Excel, etc.) are **not supported** for text extraction.
+Other file types are not supported.
 
 ---
 
@@ -59,9 +62,15 @@ Other file types (including JSON, Word, Excel, etc.) are **not supported** for t
 - However, it is **not functional**
 - Users must use the **“Choose File”** button to upload files
 
+### Name & Employee ID Masking Display
+- **Person names and Employee IDs are masked**
+- However, instead of showing masked characters (like `XXXX`),  
+  they appear as **empty colored placeholder blocks**
+- This is a UI display limitation and not a detection issue
+
 ### File Type Support
-- Only **TXT** and **PDF** files are supported
-- JSON and other formats will not be processed
+- Only **TXT** and **PDF** files are supported  
+- Other formats are not processed  
 
 ---
 
@@ -77,7 +86,7 @@ Other file types (including JSON, Word, Excel, etc.) are **not supported** for t
 ### Frontend
 - HTML  
 - CSS  
-- JavaScript  
+- JavaScript    
 
 ---
 
@@ -88,8 +97,9 @@ Other file types (including JSON, Word, Excel, etc.) are **not supported** for t
 3. User clicks **Analyze**  
 4. Presidio detects PII  
 5. Entities are highlighted  
-6. User can **Mask** or **Unmask**  
-7. Results can be downloaded as JSON  
+6. User clicks **Mask** to hide sensitive data  
+7. User clicks **Unmask** to restore original data  
+8. Results can be downloaded as JSON  
 
 ---
 
@@ -97,9 +107,10 @@ Other file types (including JSON, Word, Excel, etc.) are **not supported** for t
 
 - Uses industry-grade PII detection (Presidio)  
 - Supports Indian identifiers (Aadhaar, PAN, Voter ID)  
+- Detects names, contact details, and financial data  
 - Real-time highlighting and masking  
-- Supports both text and PDF documents  
-- Adjustable confidence level  
+- Works with both text and PDF files  
+- Adjustable confidence threshold  
 - Clean and modern UI  
 - JSON export for further analysis  
 
@@ -108,11 +119,12 @@ Other file types (including JSON, Word, Excel, etc.) are **not supported** for t
 ## Negatives of the Project
 
 - Drag-and-drop upload does not work  
+- Name and Employee ID masking appears as blank blocks  
 - Only TXT and PDF files are supported  
 - No database to store results  
-- No user login or authentication  
-- Not suitable for very large files  
+- No user authentication  
 - No real-time malware scanning  
+- Not optimized for very large files  
 
 ---
 
@@ -121,13 +133,16 @@ Other file types (including JSON, Word, Excel, etc.) are **not supported** for t
 Planned improvements include:
 
 - Enable full drag-and-drop file upload  
-- Add support for more file types (Word, JSON, CSV)  
+- Improve UI display for masked **Name** and **Employee ID**  
+- Show masked values instead of blank placeholder blocks  
+- Improve detection and masking accuracy  
+- Support additional file types  
 - Add user authentication  
 - Store scan history in a database  
 - Cloud storage integration  
 - AI-based name and address recognition  
 - Compliance reporting (GDPR, HIPAA)  
-- API access for enterprise use  
+- Enterprise API support  
 
 ---
 
