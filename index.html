@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Presidio-Based PII Detection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+<div class="container">
+
+    <!-- TITLE -->
+    <div class="title-wrapper">
+        <svg class="logo-inline" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#00f0ff;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#00a8d4;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path d="M 50 10 L 80 25 L 80 50 Q 80 75 50 90 Q 20 75 20 50 L 20 25 Z"
+                  fill="url(#shieldGradient)" stroke="rgba(0, 244, 255, 0.5)" stroke-width="1.5"/>
+            <circle cx="50" cy="50" r="20" fill="none" stroke="#fff" stroke-width="2"/>
+            <path d="M 45 45 L 48 50 L 55 40"
+                  fill="none" stroke="#fff" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1 class="title">PII Detection Tool</h1>
+    </div>
+
+    <p class="subtitle">Detect, highlight, and protect sensitive personal information instantly</p>
+
+    <!-- INPUT CARD -->
+    <div class="card">
+        <label class="section-label">Enter Text or Upload File</label>
+
+        <textarea id="inputText"
+                  placeholder="Paste text containing Aadhaar, PAN, credit card numbers, etc..."></textarea>
+
+        <!-- ✅ FIXED FILE UPLOAD -->
+        <div class="file-upload">
+    <label class="file-label">
+        <input type="file" id="fileInput" accept="*/*" onchange="showFileName(this)">
+        <span>Choose File</span>
+    </label>
+    <span id="fileName">No file chosen</span>
+</div>
+
+
+
+        <div class="buttons">
+            <button onclick="analyzeText()">🔍 Analyze</button>
+            <button onclick="maskSensitive()">🔒 Mask</button>
+            <button onclick="unmaskSensitive()">🔓 Unmask</button>
+            <button onclick="downloadJSON()">⬇ Download JSON</button>
+            <button onclick="resetAll()" class="secondary">Reset</button>
+        </div>
+    </div>
+
+    <!-- CONFIDENCE -->
+    <div style="margin: 10px 0;">
+        <label>
+            Detection Confidence:
+            <span id="thresholdValue">0.6</span>
+        </label>
+        <input type="range"
+               id="confidenceThreshold"
+               min="0.1"
+               max="1"
+               step="0.05"
+               value="0.6"
+               oninput="thresholdValue.innerText=this.value">
+    </div>
+
+    <!-- HIGHLIGHTED OUTPUT -->
+    <div class="card">
+        <label class="section-label">Highlighted Text</label>
+        <div id="outputText" class="output-box"></div>
+    </div>
+
+    <!-- RESULTS TABLE -->
+    <div class="card">
+        <label class="section-label">Detection Results</label>
+        <table>
+            <thead>
+                <tr>
+                    <th>Entity</th>
+                    <th>Value</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Confidence</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
+
+<!-- App Script -->
+<script src="/static/script.js"></script>
+</body>
+</html>
