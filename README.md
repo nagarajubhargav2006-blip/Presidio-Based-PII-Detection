@@ -2,7 +2,7 @@
 
 A web-based application that detects, highlights, and masks **Personally Identifiable Information (PII)** from text and documents using **Microsoft Presidio** with custom Indian-specific recognizers.
 
-This tool helps identify sensitive data such as Aadhaar numbers, PAN numbers, phone numbers, credit cards, emails, and locations before sharing or storing data.
+This tool helps identify and protect sensitive data such as names, addresses, Aadhaar numbers, PAN numbers, phone numbers, credit cards, emails, and voter IDs before sharing or storing data.
 
 ---
 
@@ -12,10 +12,10 @@ This application allows users to paste text or upload documents and automaticall
 
 Users can:
 - Analyze text
-- Highlight PII
+- Highlight detected PII
 - Mask sensitive values
 - Restore original text
-- Download results as JSON
+- Download detection results as JSON
 
 The backend is powered by **FastAPI** and **Presidio**, and the frontend is built using **HTML, CSS, and JavaScript**.
 
@@ -24,53 +24,73 @@ The backend is powered by **FastAPI** and **Presidio**, and the frontend is buil
 ## Key Features
 
 - Detects PII such as:
-  - Aadhaar Number
-  - PAN Number
-  - Phone Number
-  - Credit Card Number
-  - Email Address
-  - Location
-  - Voter ID
-  - IBAN
-  - Person Name
-  - Employee ID
-- Highlights detected PII in text
-- Masks sensitive values
-- Unmask to restore original content
-- Adjustable confidence threshold
-- Confidence score for each detected entity
-- Supports file upload (TXT and PDF)
-- Download detection results as JSON
+  - Person Name  
+  - Address / Location  
+  - Aadhaar Number  
+  - PAN Number  
+  - Phone Number  
+  - Credit Card Number  
+  - Email Address  
+  - Voter ID  
+  - Bank / IBAN Numbers  
+  - Employee ID  
+- Highlights detected entities in different colors  
+- Masks sensitive information  
+- Unmask to restore original content  
+- Adjustable detection confidence  
+- Confidence score for each detection  
+- Supports file upload (TXT and PDF)  
+- Download detection results as JSON  
 
 ---
 
 ## Supported File Types
 
-This application supports **only** the following file formats:
+This application supports **only**:
 
-- `.txt` — plain text files  
+- `.txt` — Plain text files  
 - `.pdf` — PDF documents  
 
 Other file types are not supported.
 
 ---
 
+## ⚠️ Known Masking Behavior
+
+The masking is applied differently for different PII types:
+
+| Data Type | Masked Output |
+|---------|---------------|
+| Name | Shown as a **blank colored block** |
+| Address (Location) | Replaced with **`[ADDRESS]`** |
+| Email | Partially hidden (e.g., `rXXXX@gmail.com`) |
+| Phone Number | Digits hidden except first & last |
+| Aadhaar | Last 4 digits visible |
+| PAN | Partial letters visible |
+| Credit Card | Last 4 digits visible |
+| Voter ID | Partial value visible |
+| Bank / IBAN | Partial value visible |
+| Employee ID | Shown as a **blank colored block** |
+
+This behavior matches what is displayed in the UI.
+
+---
+
 ## ⚠️ Known Limitations
 
 ### Drag and Drop
-- Drag-and-drop upload is visible in the UI
-- However, it is **not functional**
-- Users must use the **“Choose File”** button to upload files
+- Drag-and-drop upload is visible in the UI  
+- However, it is **not functional**  
+- Users must use the **“Choose File”** button  
 
-### Name & Employee ID Masking Display
-- **Person names and Employee IDs are masked**
-- However, instead of showing masked characters (like `XXXX`),  
-  they appear as **empty colored placeholder blocks**
-- This is a UI display limitation and not a detection issue
+### Name & Employee ID Mask Display
+- Names and Employee IDs are masked  
+- They appear as **empty colored blocks instead of XXXX**  
+- This is a UI masking display limitation  
 
-### File Type Support
-- Only **TXT** and **PDF** files are supported  
-- Other formats are not processed  
+### Address Masking
+- When a real address (e.g., *Bangalore, Karnataka*) is detected  
+- It is replaced with **`[ADDRESS]`** in the masked output  
 
 ---
 
@@ -86,20 +106,19 @@ Other file types are not supported.
 ### Frontend
 - HTML  
 - CSS  
-- JavaScript    
-
+- JavaScript   
 ---
 
 ## Application Flow
 
 1. User pastes text or uploads a TXT or PDF file  
-2. Text is extracted from the file  
+2. Text is extracted  
 3. User clicks **Analyze**  
 4. Presidio detects PII  
 5. Entities are highlighted  
-6. User clicks **Mask** to hide sensitive data  
-7. User clicks **Unmask** to restore original data  
-8. Results can be downloaded as JSON  
+6. User clicks **Mask**  
+7. Sensitive values are hidden  
+8. User can **Unmask** or **Download JSON**  
 
 ---
 
@@ -107,7 +126,7 @@ Other file types are not supported.
 
 - Uses industry-grade PII detection (Presidio)  
 - Supports Indian identifiers (Aadhaar, PAN, Voter ID)  
-- Detects names, contact details, and financial data  
+- Detects names, contact details, addresses, and financial data  
 - Real-time highlighting and masking  
 - Works with both text and PDF files  
 - Adjustable confidence threshold  
@@ -119,11 +138,11 @@ Other file types are not supported.
 ## Negatives of the Project
 
 - Drag-and-drop upload does not work  
-- Name and Employee ID masking appears as blank blocks  
+- Name and Employee ID appear as blank blocks  
 - Only TXT and PDF files are supported  
-- No database to store results  
 - No user authentication  
-- No real-time malware scanning  
+- No scan history storage  
+- No malware scanning  
 - Not optimized for very large files  
 
 ---
@@ -133,16 +152,15 @@ Other file types are not supported.
 Planned improvements include:
 
 - Enable full drag-and-drop file upload  
-- Improve UI display for masked **Name** and **Employee ID**  
-- Show masked values instead of blank placeholder blocks  
-- Improve detection and masking accuracy  
-- Support additional file types  
-- Add user authentication  
+- Show masked values (XXXX) instead of blank blocks for Name and Employee ID  
+- Improve address detection accuracy  
+- Support more file formats (DOCX, CSV, etc.)  
+- Add user login and roles  
 - Store scan history in a database  
 - Cloud storage integration  
 - AI-based name and address recognition  
-- Compliance reporting (GDPR, HIPAA)  
-- Enterprise API support  
+- Compliance reports (GDPR, HIPAA)  
+- Enterprise REST API  
 
 ---
 
