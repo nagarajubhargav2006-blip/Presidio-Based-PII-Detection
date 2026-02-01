@@ -5,3 +5,4 @@ presidio-anonymizer
 spacy
 python-multipart
 pypdf
+pydantic
