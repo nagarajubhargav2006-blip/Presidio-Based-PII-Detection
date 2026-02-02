@@ -33,7 +33,7 @@ The backend is powered by **FastAPI** and **Presidio**, and the frontend is buil
   - Email Address  
   - Voter ID  
   - Bank / IBAN Numbers  
-  - Employee ID  
+  - Employee / Company ID  
 - Highlights detected entities in different colors  
 - Masks sensitive information  
 - Unmask to restore original content  
@@ -55,24 +55,24 @@ Other file types are not supported.
 
 ---
 
-## ⚠️ Known Masking Behavior
+## ⚠️ Masking Behavior
 
-The masking is applied differently for different PII types:
+The masking is applied as follows:
 
 | Data Type | Masked Output |
 |---------|---------------|
-| Name | Shown as a **blank colored block** |
-| Address (Location) | Replaced with **`[ADDRESS]`** |
-| Email | Partially hidden (e.g., `rXXXX@gmail.com`) |
+| Name | Masked as `XXXXXX` style characters |
+| Address (Location) | Replaced with **`[ADDRESS]`** blocks |
+| Email | Partially hidden (e.g., `sXXXX@gmail.com`) |
 | Phone Number | Digits hidden except first & last |
 | Aadhaar | Last 4 digits visible |
-| PAN | Partial letters visible |
+| PAN | Partial characters visible |
 | Credit Card | Last 4 digits visible |
-| Voter ID | Partial value visible |
-| Bank / IBAN | Partial value visible |
-| Employee ID | Shown as a **blank colored block** |
+| Voter ID | Partially masked |
+| Bank / IBAN | Partially masked |
+| Company / Employee ID | Masked |
 
-This behavior matches what is displayed in the UI.
+This matches the output displayed in the UI.
 
 ---
 
@@ -83,14 +83,9 @@ This behavior matches what is displayed in the UI.
 - However, it is **not functional**  
 - Users must use the **“Choose File”** button  
 
-### Name & Employee ID Mask Display
-- Names and Employee IDs are masked  
-- They appear as **empty colored blocks instead of XXXX**  
-- This is a UI masking display limitation  
-
-### Address Masking
-- When a real address (e.g., *Bangalore, Karnataka*) is detected  
-- It is replaced with **`[ADDRESS]`** in the masked output  
+### File Type Support
+- Only **TXT** and **PDF** files are supported  
+- Other formats are not processed  
 
 ---
 
@@ -106,7 +101,8 @@ This behavior matches what is displayed in the UI.
 ### Frontend
 - HTML  
 - CSS  
-- JavaScript   
+- JavaScript  
+
 ---
 
 ## Application Flow
@@ -126,7 +122,7 @@ This behavior matches what is displayed in the UI.
 
 - Uses industry-grade PII detection (Presidio)  
 - Supports Indian identifiers (Aadhaar, PAN, Voter ID)  
-- Detects names, contact details, addresses, and financial data  
+- Proper masking for names, phone numbers, emails, and IDs  
 - Real-time highlighting and masking  
 - Works with both text and PDF files  
 - Adjustable confidence threshold  
@@ -138,7 +134,7 @@ This behavior matches what is displayed in the UI.
 ## Negatives of the Project
 
 - Drag-and-drop upload does not work  
-- Name and Employee ID appear as blank blocks  
+- Address appears only as `[ADDRESS]` blocks  
 - Only TXT and PDF files are supported  
 - No user authentication  
 - No scan history storage  
@@ -152,8 +148,7 @@ This behavior matches what is displayed in the UI.
 Planned improvements include:
 
 - Enable full drag-and-drop file upload  
-- Show masked values (XXXX) instead of blank blocks for Name and Employee ID  
-- Improve address detection accuracy  
+- Improve address masking to show partial city/state instead of `[ADDRESS]`  
 - Support more file formats (DOCX, CSV, etc.)  
 - Add user login and roles  
 - Store scan history in a database  
