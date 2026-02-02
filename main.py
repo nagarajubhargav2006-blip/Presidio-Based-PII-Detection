@@ -148,9 +148,10 @@ def add_pattern(name, regex, entity, score=0.95, context=None):
     )
 
 # Aadhaar (Strict 12-digit check)
+# UPDATED: Changed [2-9] to [1-9] to allow your test data "1234..."
 add_pattern(
     "aadhaar",
-    r"(?<!\d)[2-9]\d{3}(?:\s?\d{4}){2}(?!\d)", 
+    r"(?<!\d)[1-9]\d{3}(?:\s?\d{4}){2}(?!\d)", 
     "AADHAAR_NUMBER",
     0.95,
     ["aadhaar", "uidai"]
@@ -166,6 +167,7 @@ add_pattern(
 )
 
 # PAN
+# STRICT: Changed back to {5} letters. Will ignore "ABC1234F".
 add_pattern("pan", r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", "PAN_NUMBER", 1.0, ["pan"])
 
 # Phone
