@@ -43,11 +43,13 @@ class TextRequest(BaseModel):
 registry = RecognizerRegistry()
 registry.load_predefined_recognizers()
 
-# Remove recognizers that clash with Indian formats
+# REMOVE DEFAULT CREDIT CARD RECOGNIZER & OTHERS
+# This ensures Presidio's default logic doesn't interfere
 registry.recognizers = [
     r for r in registry.recognizers
     if "UK_NHS" not in r.supported_entities
     and "US_DRIVER_LICENSE" not in r.supported_entities
+    and "CREDIT_CARD" not in r.supported_entities  # <--- Removes default detector
 ]
 
 # Remove weak DATE recognizer
@@ -67,15 +69,16 @@ nlp_engine = provider.create_engine()
 
 analyzer = AnalyzerEngine(registry=registry, nlp_engine=nlp_engine)
 
-# ---------------- CUSTOM NAME RECOGNIZER (Fix for "Pooja Malhotra") ---------------- #
+# ---------------- CUSTOM NAME RECOGNIZER (Fix for "Name:" Context) ---------------- #
 class ContextNameRecognizer(EntityRecognizer):
     def __init__(self):
         super().__init__(supported_entities=["PERSON"], supported_language="en")
 
     def analyze(self, text, entities, nlp_artifacts=None):
         results = []
-        # Looks for "Name: [Value]"
-        pattern = r"(?:name|full name)\s*[:\-]\s*([a-zA-Z]+(?:\s[a-zA-Z]+)*)"
+        # FIX: Changed [:\-] to [:] to strictly look for "Name: "
+        # We also added \b to ensure we match whole words only.
+        pattern = r"\b(?:name|full name)\s*[:]\s*([a-zA-Z]+(?:\s[a-zA-Z]+)*)"
         
         for match in re.finditer(pattern, text, flags=re.IGNORECASE):
             start, end = match.span(1)
@@ -90,13 +93,24 @@ class ContextNameRecognizer(EntityRecognizer):
         return results
 
 analyzer.registry.add_recognizer(ContextNameRecognizer())
-# ---------------- END CUSTOM NAME RECOGNIZER ---------------- #
 
-
-# ---------------- PERSON NAME RECOGNIZER (SpaCy) ---------------- #
+# ---------------- PERSON NAME RECOGNIZER (SpaCy with Blacklist) ---------------- #
 class SpacyPersonRecognizer(EntityRecognizer):
     def __init__(self):
         super().__init__(supported_entities=["PERSON"], supported_language="en")
+        
+        # 🛑 BLACKLIST: Words that are NOT people but SpaCy confuses for names
+        self.deny_list = {
+            "aadhaar", "uidai", "aadhar",
+            "pan", "card", "pancard",
+            "vote", "voter", "id", "epic",
+            "license", "driving", "dl",
+            "credit", "debit", "visa", "mastercard",
+            "phone", "mobile", "number",
+            "passport", "email", "address",
+            "india", "state", "govt", "government",
+            "name", "is", "proof" # Added "is" and "proof" just in case
+        }
 
     def analyze(self, text, entities, nlp_artifacts=None):
         results = []
@@ -105,6 +119,10 @@ class SpacyPersonRecognizer(EntityRecognizer):
 
         for ent in nlp_artifacts.entities:
             if ent.label_ == "PERSON":
+                # Check if the word is in our blacklist (case-insensitive)
+                if ent.text.lower() in self.deny_list:
+                    continue  # SKIP IT!
+                
                 results.append(
                     RecognizerResult(
                         entity_type="PERSON",
@@ -138,14 +156,20 @@ add_pattern(
     ["aadhaar", "uidai"]
 )
 
+# Credit Card (STRICT: Matches ONLY 16 digits. Ignores 13-digit Aadhaar errors)
+add_pattern(
+    "credit_card", 
+    r"\b(?:\d[ -]*?){16}\b", 
+    "CREDIT_CARD", 
+    0.9, 
+    ["card", "visa", "mastercard"]
+)
+
 # PAN
 add_pattern("pan", r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", "PAN_NUMBER", 1.0, ["pan"])
 
 # Phone
 add_pattern("phone", r"\b[6-9]\d{9}\b", "PHONE_NUMBER", 0.95, ["phone", "mobile"])
-
-# Credit Card
-add_pattern("credit_card", r"\b(?:\d[ -]*?){13,16}\b", "CREDIT_CARD", 0.9, ["card", "visa", "mastercard"])
 
 # Bank Account / IBAN
 add_pattern("iban", r"\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b", "IBAN_CODE", 0.95, ["bank", "account", "iban"])
@@ -153,7 +177,7 @@ add_pattern("iban", r"\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b", "IBAN_CODE", 0.95, ["ba
 # --- UPDATED EMPLOYEE ID REGEX (Allows EMP5566 and EMP-5566) ---
 add_pattern(
     "employee", 
-    r"\b(?:EMP[-]?\d{4,6}|ORG[-]?\d{4,6})\b",  # Added [-]? to make hyphen optional
+    r"\b(?:EMP[-]?\d{4,6}|ORG[-]?\d{4,6})\b", 
     "EMPLOYEE_ID", 
     0.95, 
     ["employee", "emp id"]
