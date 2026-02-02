@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+import re
 
 from presidio_analyzer import (
     AnalyzerEngine,
@@ -35,7 +36,7 @@ def serve_ui():
 
 class TextRequest(BaseModel):
     text: str
-    threshold  : float= 0.6   # means 60%
+    threshold: float = 0.6   # Default threshold if not provided
 
 # ---------------- ANALYZER SETUP ---------------- #
 
@@ -66,8 +67,33 @@ nlp_engine = provider.create_engine()
 
 analyzer = AnalyzerEngine(registry=registry, nlp_engine=nlp_engine)
 
-# ---------------- PERSON NAME RECOGNIZER ---------------- #
+# ---------------- CUSTOM NAME RECOGNIZER (Fix for "Pooja Malhotra") ---------------- #
+class ContextNameRecognizer(EntityRecognizer):
+    def __init__(self):
+        super().__init__(supported_entities=["PERSON"], supported_language="en")
 
+    def analyze(self, text, entities, nlp_artifacts=None):
+        results = []
+        # Looks for "Name: [Value]"
+        pattern = r"(?:name|full name)\s*[:\-]\s*([a-zA-Z]+(?:\s[a-zA-Z]+)*)"
+        
+        for match in re.finditer(pattern, text, flags=re.IGNORECASE):
+            start, end = match.span(1)
+            results.append(
+                RecognizerResult(
+                    entity_type="PERSON",
+                    start=start,
+                    end=end,
+                    score=1.0 
+                )
+            )
+        return results
+
+analyzer.registry.add_recognizer(ContextNameRecognizer())
+# ---------------- END CUSTOM NAME RECOGNIZER ---------------- #
+
+
+# ---------------- PERSON NAME RECOGNIZER (SpaCy) ---------------- #
 class SpacyPersonRecognizer(EntityRecognizer):
     def __init__(self):
         super().__init__(supported_entities=["PERSON"], supported_language="en")
@@ -103,10 +129,10 @@ def add_pattern(name, regex, entity, score=0.95, context=None):
         )
     )
 
-# Aadhaar (Improved for PDF spacing)
+# Aadhaar (Strict 12-digit check)
 add_pattern(
     "aadhaar",
-    r"\b[2-9]\d{3}(?:\s?\d{4}){2}\b",
+    r"(?<!\d)[2-9]\d{3}(?:\s?\d{4}){2}(?!\d)", 
     "AADHAAR_NUMBER",
     0.95,
     ["aadhaar", "uidai"]
@@ -124,8 +150,14 @@ add_pattern("credit_card", r"\b(?:\d[ -]*?){13,16}\b", "CREDIT_CARD", 0.9, ["car
 # Bank Account / IBAN
 add_pattern("iban", r"\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b", "IBAN_CODE", 0.95, ["bank", "account", "iban"])
 
-# Employee ID
-add_pattern("employee", r"\b(?:EMP-\d{4,6}|ORG\d{4,6})\b", "EMPLOYEE_ID", 0.95, ["employee", "emp id"])
+# --- UPDATED EMPLOYEE ID REGEX (Allows EMP5566 and EMP-5566) ---
+add_pattern(
+    "employee", 
+    r"\b(?:EMP[-]?\d{4,6}|ORG[-]?\d{4,6})\b",  # Added [-]? to make hyphen optional
+    "EMPLOYEE_ID", 
+    0.95, 
+    ["employee", "emp id"]
+)
 
 # Voter ID
 add_pattern("voter", r"\b[A-Z]{3}[0-9]{7}\b", "VOTER_ID", 0.95, ["voter"])
@@ -145,7 +177,7 @@ add_pattern("pincode", r"\b[1-9][0-9]{5}\b", "PINCODE", 0.9)
 # UPI
 add_pattern("upi", r"\b[\w.-]+@[a-zA-Z]+\b", "UPI_ID", 0.85, ["upi"])
 
-# ---------------- ADDRESS / LOCATION RECOGNIZER (NEW FIX) ---------------- #
+# ---------------- ADDRESS / LOCATION RECOGNIZER ---------------- #
 
 class AddressRecognizer(EntityRecognizer):
     def __init__(self):
@@ -157,7 +189,7 @@ class AddressRecognizer(EntityRecognizer):
             return results
 
         for ent in nlp_artifacts.entities:
-            if ent.label_ in ["GPE", "LOC"]:  # Cities, states, countries, places
+            if ent.label_ in ["GPE", "LOC"]: 
                 results.append(
                     RecognizerResult(
                         entity_type="LOCATION",
@@ -207,12 +239,14 @@ registry.add_recognizer(location_recognizer)
 # ---------------- API ROUTE ---------------- #
 
 @app.post("/analyze")
-def analyze_text(request: TextRequest):
+async def analyze_text(request: TextRequest):
     results = analyzer.analyze(
         text=request.text,
-        language="en",
-        score_threshold=0.6
+        language="en"
     )
+
+    # Filtering Logic
+    results = [r for r in results if r.score >= request.threshold]
 
     results = clean_results(results)
 
