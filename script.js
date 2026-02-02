@@ -197,7 +197,17 @@ function maskByType(entity, value) {
             const parts = value.split("@");
             return parts[0][0] + "X".repeat(parts[0].length - 1) + "@" + parts[1];
         case "LOCATION": return "[ADDRESS]";
-        default: return "█".repeat(value.length);
+        case "PERSON": 
+            // Keep first letter, mask the rest with 'x'
+            // Ensure we handle single-letter names gracefully
+            if (value.length <= 1) return "X";
+            return value[0] + "x".repeat(value.length - 1);
+        
+        case "EMPLOYEE_ID": 
+            // Standard masking for IDs (e.g., "EMP123" -> "EMP-XXX")
+            return "ID-XXXX"; 
+        //
+        default: return " ".repeat(value.length);
     }
 }
 
