@@ -81,12 +81,25 @@ This matches the output displayed in the UI.
 Address and location detection is implemented using a **regex-based recognizer**, which detects only specific predefined cities, states, and country names.
 
 The current recognizer pattern is:
+
 (Bangalore | Bengaluru | Mumbai | Delhi | Chennai | Hyderabad | Kolkata | Pune |
 Karnataka | Tamil Nadu | Maharashtra | India)
 
 
-
 Only these values will be detected and masked as `[ADDRESS]`.
+
+---
+
+## Employee ID Detection Logic
+
+Employee and company IDs are detected using a **prefix-based regex recognizer**.
+
+The current supported employee ID prefixes are:
+
+INFY, EMP, CTS, ORG
+
+
+Any ID starting with one of these prefixes (for example: `INFY43210`, `EMP56789`, `CTS99821`, `ORG12345`) will be detected and masked.
 
 ---
 
@@ -101,6 +114,10 @@ Only these values will be detected and masked as `[ADDRESS]`.
 - Address detection is **not AI-based**
 - It works only for predefined city/state names using regex  
 - New or unknown locations will not be detected  
+
+### Employee ID Detection
+- Only employee IDs starting with `INFY`, `EMP`, `CTS`, or `ORG` are detected  
+- Other company ID formats will not be recognized  
 
 ### File Type Support
 - Only **TXT** and **PDF** files are supported  
@@ -154,6 +171,7 @@ Only these values will be detected and masked as `[ADDRESS]`.
 - Drag-and-drop upload does not work  
 - Address detection works only for predefined cities and states  
 - Location recognition is regex-based, not AI-based  
+- Employee ID detection is limited to specific prefixes  
 - Only TXT and PDF files are supported  
 - No user authentication  
 - No scan history storage  
@@ -168,6 +186,7 @@ Planned improvements include:
 
 - Enable full drag-and-drop file upload  
 - Replace regex-based address detection with AI-based NER  
+- Add more employee ID patterns  
 - Support more file formats (DOCX, CSV, etc.)  
 - Add user login and roles  
 - Store scan history in a database  
@@ -183,5 +202,3 @@ Planned improvements include:
 MIT License  
 
 This project is intended for **academic, demo, and prototype use**.
-
-
