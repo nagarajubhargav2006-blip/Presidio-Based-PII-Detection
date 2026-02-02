@@ -176,13 +176,13 @@ add_pattern("phone", r"\b[6-9]\d{9}\b", "PHONE_NUMBER", 0.95, ["phone", "mobile"
 # Bank Account / IBAN
 add_pattern("iban", r"\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b", "IBAN_CODE", 0.95, ["bank", "account", "iban"])
 
-# --- UPDATED EMPLOYEE ID REGEX (Allows EMP5566 and EMP-5566) ---
+# --- UPDATED EMPLOYEE ID REGEX (Added INFY, CTS, ORG, EMP) ---
 add_pattern(
     "employee", 
-    r"\b(?:EMP[-]?\d{4,6}|ORG[-]?\d{4,6})\b", 
+    r"\b(?:EMP|ORG|INFY|CTS)[-]?\d{4,6}\b", 
     "EMPLOYEE_ID", 
     0.95, 
-    ["employee", "emp id"]
+    ["employee", "emp id", "id"]
 )
 
 # Voter ID
